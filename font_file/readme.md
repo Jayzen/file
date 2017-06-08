@@ -1,7 +1,5 @@
 使用prawn这个gem的时候，因为暂时找不到网络上使用的字体，因此需要将字体下载到本地文件夹中，示例代码如下
-
-#clients_controller.rb
-
+```ruby
 #clients_controller.rb
 
 def download_pdf
@@ -26,3 +24,4 @@ private
       end
     end.render
   end
+```
