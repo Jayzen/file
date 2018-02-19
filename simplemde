@@ -1,0 +1,74 @@
+<div>
+  <%= render 'errors' %>
+  <%= form_for(@article,
+                url: (@article.new_record? ? articles_path : article_path(@article)),
+                method: (@article.new_record? ? 'post' : 'put')
+              ) do |f| %>
+    <div class="input-group mb-3">
+      <%= f.text_field :title, class:"form-control", placeholder: "输入文章标题..." %>
+    </div>
+    <div class="form-group">
+      <%= content_for :javascripts do %>
+        <script>
+          let simplemde = null; 
+
+          $(document).on("turbolinks:before-visit", function() {
+            if (simplemde != null) { 
+            simplemde.toTextArea();
+            return simplemde = null;
+            }
+          });
+
+          $(document).on("turbolinks:load", () => simplemde = new SimpleMDE({
+            toolbar: [{name: "bold", action: SimpleMDE.toggleBold, className: "fa fa-bold",title: "Bold",},
+            {name: "italic", action: SimpleMDE.toggleItalic, className: "fa fa-italic", title: "Italic",},
+            {name: "heading", action: SimpleMDE.toggleHeadingSmaller, className: "fa fa-header", title: "Heading",},
+            "|",
+            {name: "quote", action: SimpleMDE.toggleBlockquote, className: "fa fa-quote-left", title: "Quote",},
+            {name: "unordered-list", action: SimpleMDE.toggleUnorderedList, className: "fa fa-list-ul", title: "Generic List",},
+            {name: "ordered-list", action: SimpleMDE.toggleOrderedList, className: "fa fa-list-ol", title: "Numbered List",},
+            "|",
+            {name: "link", action: SimpleMDE.drawLink, className: "fa fa-link", title: "Create Link",},
+            {name: "image", action: SimpleMDE.drawImage, className: "fa fa-picture-o", title: "Insert Image",
+       	    },
+            "|",
+            {name: "preview", action: SimpleMDE.togglePreview, className: "fa fa-eye no-disable",title: "Toggle Preview",},
+            {name: "side-by-side", action: SimpleMDE.toggleSideBySide, className: "fa fa-columns no-disable no-mobile", title: "Toggle Side by Side",},
+            {name: "fullscreen", action: SimpleMDE.toggleFullScreen, className: "fa fa-arrows-alt no-disable no-mobile",title: "Toggle Fullscreen",}]
+          }));
+        </script>
+      <% end -%> 
+      <%= f.text_area :content, class:"form-control", rows: 15, placeholder: "输入文章正文..." %>
+    </div>
+    <%= hidden_field_tag :user_id, current_user.id %>
+    
+    <div class="d-flex flex-row row-hl">
+      <div class="form-group item-hl mr-3">
+        <label class="text-secondary">标签</label>
+        <select name="article[category_id]", class="form-control text-secondary">
+          <option></option>
+          <option value="" selected disabled hidden>选择标签..</option>
+          <% @root_categories.each do |category| %>
+            <optgroup label="<%= category.name %>"></optgroup>
+            <% category.children.each do |sub_category| %>
+              <option value="<%= sub_category.id %>" <%= @article.category_id == sub_category.id ? 'selected' : '' %>><%= sub_category.name %></option>
+            <% end -%>
+          <% end -%>
+        </select>
+      </div>
+      <div class="form-group item-hl mr-3">
+        <label class="text-secondary">状态:</label>
+        <select name="product[status]"  class="form-control text-secondary">
+          <% [[Article::Status::On, '发布'], [Article::Status::Off, '不发布']].each do |row| %>
+            <option value="<%= row.first %>" <%= 'selected' if @article.status == row.first %>><%= row.last %></option>
+          <% end -%>
+        </select> 
+      </div>
+
+      <div class="form-group item-hl">
+        <label>&nbsp </label>
+        <%= f.submit @article.new_record? ? "保存文章" : "编辑文章", class: "form-control btn-primary"%>
+      </div>
+    </div>
+  <% end -%>
+</div>
